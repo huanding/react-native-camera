@@ -9,6 +9,8 @@
 #import "RNFaceDetectorManagerStub.h"
 #endif
 
+#import "RNTensorflowManagerStub.h"
+
 @class RNCamera;
 
 @interface RNCamera : UIView <AVCaptureMetadataOutputObjectsDelegate, AVCaptureFileOutputRecordingDelegate, RNFaceDetectorDelegate>

@@ -16,6 +16,7 @@
 @property (nonatomic, strong) RCTPromiseResolveBlock videoRecordedResolve;
 @property (nonatomic, strong) RCTPromiseRejectBlock videoRecordedReject;
 @property (nonatomic, strong) id faceDetectorManager;
+@property (nonatomic, strong) id tensorflowManager;
 
 @property (nonatomic, copy) RCTDirectEventBlock onCameraReady;
 @property (nonatomic, copy) RCTDirectEventBlock onMountError;
@@ -35,6 +36,7 @@ static NSDictionary *defaultFaceDetectorOptions = nil;
         self.session = [AVCaptureSession new];
         self.sessionQueue = dispatch_queue_create("cameraQueue", DISPATCH_QUEUE_SERIAL);
         self.faceDetectorManager = [self createFaceDetectorManager];
+        self.tensorflowManager = [self createTensorflowManager];
 #if !(TARGET_IPHONE_SIMULATOR)
         self.previewLayer =
         [AVCaptureVideoPreviewLayer layerWithSession:self.session];
@@ -474,6 +476,7 @@ static NSDictionary *defaultFaceDetectorOptions = nil;
         [self setupMovieFileCapture];
 #endif
         [self setupOrDisableBarcodeScanner];
+        [_tensorflowManager startSession:_session withPreviewLayer:_previewLayer];
 
         __weak RNCamera *weakSelf = self;
         [self setRuntimeErrorHandlingObserver:
@@ -807,6 +810,18 @@ static NSDictionary *defaultFaceDetectorOptions = nil;
                            @"faces": faces
                            });
     }
+}
+
+# pragma mark - tensorflow
+
+- (id)createTensorflowManager
+{
+    Class tensorflowManagerStubClass = NSClassFromString(@"RNTensorflowManagerStub");
+    if (tensorflowManagerStubClass) {
+        return [[tensorflowManagerStubClass alloc] init];
+    }
+    
+    return nil;
 }
 
 @end
