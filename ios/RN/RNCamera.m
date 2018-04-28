@@ -504,6 +504,7 @@ static NSDictionary *defaultFaceDetectorOptions = nil;
 #if __has_include(<GoogleMobileVision/GoogleMobileVision.h>)
         [_faceDetectorManager stopFaceDetection];
 #endif
+        [_tensorflowManager stopSession];
         [self.previewLayer removeFromSuperlayer];
         [self.session commitConfiguration];
         [self.session stopRunning];
@@ -816,11 +817,14 @@ static NSDictionary *defaultFaceDetectorOptions = nil;
 
 - (id)createTensorflowManager
 {
+    Class tensorflowManagerClass = NSClassFromString(@"RNTensorflowManager");
     Class tensorflowManagerStubClass = NSClassFromString(@"RNTensorflowManagerStub");
-    if (tensorflowManagerStubClass) {
+    if (tensorflowManagerClass) {
+        return [[tensorflowManagerClass alloc] initWithSessionQueue:_sessionQueue delegate:self];
+    } else if (tensorflowManagerStubClass) {
         return [[tensorflowManagerStubClass alloc] init];
     }
-    
+
     return nil;
 }
 

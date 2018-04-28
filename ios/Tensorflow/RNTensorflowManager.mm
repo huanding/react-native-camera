@@ -3,15 +3,26 @@
 #import "RNCamera.h"
 #import "RNTensorflowManager.h"
 
-@interface RNTensorflowManager() <AVCaptureVideoDataOutputSampleBufferDelegate>
+#ifdef __cplusplus
+#include <types_c.h>
+#import <opencv2/highgui/highgui.hpp>
+#import <opencv2/videoio/cap_ios.h>
+using namespace cv;
+#endif
 
-@property (nonatomic, strong) GMVDataOutput *dataOutput;
+@interface RNTensorflowManager() <AVCaptureVideoDataOutputSampleBufferDelegate> {
+    dispatch_queue_t videoDataOutputQueue;
+    UIDeviceOrientation deviceOrientation;
+}
+
+@property (nonatomic, strong) AVCaptureVideoDataOutput *dataOutput;
 @property (nonatomic, weak) AVCaptureSession *session;
 @property (nonatomic, weak) dispatch_queue_t sessionQueue;
 @property (nonatomic, assign, getter=isConnected) BOOL connected;
 @property (nonatomic, weak) id <RNTensorflowDelegate> delegate;
 @property (nonatomic, weak) AVCaptureVideoPreviewLayer *previewLayer;
 @property (nonatomic, assign, getter=isEnabled) BOOL enabled;
+@property (atomic) BOOL isProcessingFrame;
 @end
 
 @implementation RNTensorflowManager
@@ -23,7 +34,9 @@
 
 + (NSDictionary *)constants
 {
-    return [RNFaceDetectorUtils constantsToExport];
+    return @{@"Mode" : @{},
+             @"Landmarks" : @{},
+             @"Classifications" : @{}};
 }
 
 - (instancetype)initWithSessionQueue:(dispatch_queue_t)sessionQueue delegate:(id <RNTensorflowDelegate>)delegate
@@ -49,7 +62,6 @@
     BOOL newEnabled = [RCTConvert BOOL:json];
 
     if ([self isEnabled] != newEnabled) {
-        _faceDetecting = newEnabled;
         [self _runBlockIfQueueIsPresent:^{
             if ([self isEnabled]) {
                 if (_dataOutput) {
@@ -118,7 +130,7 @@
 
     if ([_session.outputs containsObject:_dataOutput]) {
         [_session removeOutput:_dataOutput];
-        [_dataOutput cleanup];
+        [_dataOutput setSampleBufferDelegate:nil queue:NULL];
         _dataOutput = nil;
         _connected = false;
     }
@@ -142,12 +154,6 @@
     }
 }
 
-- (void)_resetFaceDetector
-{
-    [self stopFaceDetection];
-    [self tryEnabling];
-}
-
 - (void)_notifyOfFaces:(NSArray<NSDictionary *> *)faces
 {
     NSArray<NSDictionary *> *reportableFaces = faces == nil ? @[] : faces;
@@ -166,6 +172,8 @@
         dispatch_async(_sessionQueue, block);
     }
 }
+
+#pragma mark - OpenCV
 
 void rot90(cv::Mat &matImage, int rotflag) {
     // 1=CW, 2=CCW, 3=180
@@ -216,23 +224,23 @@ void rot90(cv::Mat &matImage, int rotflag) {
         }
         rot90(src, rotate);
 
-        [[PlateScanner sharedInstance] scanImage:src onSuccess:^(PlateResult *result) {
-            if (result && self.camera.onPlateRecognized) {
-                self.camera.onPlateRecognized(@{
-                    @"confidence": @(result.confidence),
-                    @"plate": result.plate
-                });
-            }
-
-            CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
-            self.isProcessingFrame = NO;
-
-            [self _notifyOfFaces:encodedFaces];
-
-        } onFailure:^(NSError *err) {
-            CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
-            self.isProcessingFrame = NO;
-        }];
+//        [[PlateScanner sharedInstance] scanImage:src onSuccess:^(PlateResult *result) {
+//            if (result && self.camera.onPlateRecognized) {
+//                self.camera.onPlateRecognized(@{
+//                    @"confidence": @(result.confidence),
+//                    @"plate": result.plate
+//                });
+//            }
+//
+//            CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
+//            self.isProcessingFrame = NO;
+//
+//            [self _notifyOfFaces:encodedFaces];
+//
+//        } onFailure:^(NSError *err) {
+//            CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
+//            self.isProcessingFrame = NO;
+//        }];
     }
 }
 

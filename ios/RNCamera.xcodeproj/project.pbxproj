@@ -17,6 +17,10 @@
 		71C7FFD02013C7E5006EB75A /* RNCameraUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 71C7FFCF2013C7E5006EB75A /* RNCameraUtils.m */; };
 		71C7FFD32013C817006EB75A /* RNImageUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 71C7FFD22013C817006EB75A /* RNImageUtils.m */; };
 		71C7FFD62013C824006EB75A /* RNFileSystem.m in Sources */ = {isa = PBXBuildFile; fileRef = 71C7FFD52013C824006EB75A /* RNFileSystem.m */; };
+		9F7CDFF9208F0AA900AF9166 /* URLHelper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9F7CDFF8208F0AA900AF9166 /* URLHelper.mm */; };
+		9F7CDFFB208F0F0C00AF9166 /* RNTensorflowManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9F7CDFFA208F0F0B00AF9166 /* RNTensorflowManager.mm */; };
+		9F7CE0762092E76C00AF9166 /* TensorflowInference.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9F7CE0752092E76C00AF9166 /* TensorflowInference.mm */; };
+		9F7CE0DE209441AA00AF9166 /* ImageProcessor.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9F7CE0DD209441AA00AF9166 /* ImageProcessor.mm */; };
 		9FACA85D206617E700BED5D0 /* RNTensorflowManagerStub.m in Sources */ = {isa = PBXBuildFile; fileRef = 9FACA85C206617E700BED5D0 /* RNTensorflowManagerStub.m */; };
 		9FE592B31CA3CBF500788287 /* RCTSensorOrientationChecker.m in Sources */ = {isa = PBXBuildFile; fileRef = 9FE592B21CA3CBF500788287 /* RCTSensorOrientationChecker.m */; };
 /* End PBXBuildFile section */
@@ -54,9 +58,16 @@
 		71C7FFD22013C817006EB75A /* RNImageUtils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNImageUtils.m; sourceTree = "<group>"; };
 		71C7FFD42013C824006EB75A /* RNFileSystem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNFileSystem.h; sourceTree = "<group>"; };
 		71C7FFD52013C824006EB75A /* RNFileSystem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNFileSystem.m; sourceTree = "<group>"; };
+		9F7CDFF6208F0A8900AF9166 /* RNTensorflowManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNTensorflowManager.h; sourceTree = "<group>"; };
+		9F7CDFF7208F0AA900AF9166 /* URLHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = URLHelper.h; sourceTree = "<group>"; };
+		9F7CDFF8208F0AA900AF9166 /* URLHelper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = URLHelper.mm; sourceTree = "<group>"; };
+		9F7CDFFA208F0F0B00AF9166 /* RNTensorflowManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = RNTensorflowManager.mm; sourceTree = "<group>"; };
+		9F7CE0742092E76C00AF9166 /* TensorFlowInference.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TensorFlowInference.h; sourceTree = "<group>"; };
+		9F7CE0752092E76C00AF9166 /* TensorflowInference.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TensorflowInference.mm; sourceTree = "<group>"; };
+		9F7CE0DC209441AA00AF9166 /* ImageProcessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageProcessor.h; sourceTree = "<group>"; };
+		9F7CE0DD209441AA00AF9166 /* ImageProcessor.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ImageProcessor.mm; sourceTree = "<group>"; };
 		9FACA85B206617E600BED5D0 /* RNTensorflowManagerStub.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNTensorflowManagerStub.h; sourceTree = "<group>"; };
 		9FACA85C206617E700BED5D0 /* RNTensorflowManagerStub.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNTensorflowManagerStub.m; sourceTree = "<group>"; };
-		9FACA85E206617F200BED5D0 /* Tensorflow */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Tensorflow; sourceTree = "<group>"; };
 		9FE592B11CA3CBF500788287 /* RCTSensorOrientationChecker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTSensorOrientationChecker.h; sourceTree = "<group>"; };
 		9FE592B21CA3CBF500788287 /* RCTSensorOrientationChecker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTSensorOrientationChecker.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -75,7 +86,7 @@
 		410701241ACB719800C6AA39 = {
 			isa = PBXGroup;
 			children = (
-				9FACA85E206617F200BED5D0 /* Tensorflow */,
+				9F7CDFF3208F0A5800AF9166 /* Tensorflow */,
 				714166162013E1B600EE9FCC /* RN */,
 				714166152013E19D00EE9FCC /* RCT */,
 				410701301ACB723B00C6AA39 /* Products */,
@@ -125,6 +136,21 @@
 				7103647A20195C53009691D1 /* RNFaceDetectorManagerStub.m */,
 			);
 			path = RN;
+			sourceTree = "<group>";
+		};
+		9F7CDFF3208F0A5800AF9166 /* Tensorflow */ = {
+			isa = PBXGroup;
+			children = (
+				9F7CDFF7208F0AA900AF9166 /* URLHelper.h */,
+				9F7CDFF8208F0AA900AF9166 /* URLHelper.mm */,
+				9F7CE0DC209441AA00AF9166 /* ImageProcessor.h */,
+				9F7CE0DD209441AA00AF9166 /* ImageProcessor.mm */,
+				9F7CE0742092E76C00AF9166 /* TensorFlowInference.h */,
+				9F7CE0752092E76C00AF9166 /* TensorflowInference.mm */,
+				9F7CDFF6208F0A8900AF9166 /* RNTensorflowManager.h */,
+				9F7CDFFA208F0F0B00AF9166 /* RNTensorflowManager.mm */,
+			);
+			path = Tensorflow;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -184,13 +210,17 @@
 			files = (
 				9FACA85D206617E700BED5D0 /* RNTensorflowManagerStub.m in Sources */,
 				0314E39D1B661A460092D183 /* CameraFocusSquare.m in Sources */,
+				9F7CDFFB208F0F0C00AF9166 /* RNTensorflowManager.mm in Sources */,
 				454EBCF41B5082DC00AD0F86 /* NSMutableDictionary+ImageMetadata.m in Sources */,
+				9F7CDFF9208F0AA900AF9166 /* URLHelper.mm in Sources */,
 				71C7FFD62013C824006EB75A /* RNFileSystem.m in Sources */,
 				4107014E1ACB732B00C6AA39 /* RCTCameraManager.m in Sources */,
+				9F7CE0762092E76C00AF9166 /* TensorflowInference.mm in Sources */,
 				7103647B20195C53009691D1 /* RNFaceDetectorManagerStub.m in Sources */,
 				4107014D1ACB732B00C6AA39 /* RCTCamera.m in Sources */,
 				71C7FFD02013C7E5006EB75A /* RNCameraUtils.m in Sources */,
 				7162BE682013EAA400FE51FF /* RNCameraManager.m in Sources */,
+				9F7CE0DE209441AA00AF9166 /* ImageProcessor.mm in Sources */,
 				7162BE672013EAA100FE51FF /* RNCamera.m in Sources */,
 				9FE592B31CA3CBF500788287 /* RCTSensorOrientationChecker.m in Sources */,
 				71C7FFD32013C817006EB75A /* RNImageUtils.m in Sources */,
@@ -203,12 +233,24 @@
 		410701291ACB719800C6AA39 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ENABLE_BITCODE = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				VALID_ARCHS = arm64;
 			};
 			name = Debug;
 		};
 		4107012A1ACB719800C6AA39 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ENABLE_BITCODE = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				VALIDATE_PRODUCT = YES;
+				VALID_ARCHS = arm64;
 			};
 			name = Release;
 		};
@@ -230,12 +272,9 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				ENABLE_BITCODE = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SRCROOT)/../../../ios/**",
-					"${BUILT_PRODUCTS_DIR}/**",
-					"$(SRCROOT)/../../ios/**",
-				);
+				FRAMEWORK_SEARCH_PATHS = "${BUILT_PRODUCTS_DIR}/**";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -251,17 +290,30 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/../../../React/**",
-					"$(SRCROOT)/../../react-native/React/**",
+					"$(SRCROOT)/../../opencv/modules/**",
+					"$(SRCROOT)/../../tensorflow",
+					"$(SRCROOT)/../../opencv/ios/build/build-arm64-iphoneos",
+					"$(SRCROOT)/../../opencv/ios/build/build-armv7s-iphoneos",
+					"$(SRCROOT)/../../opencv/ios/build/build-armv7-iphoneos",
+					"$(SRCROOT)/../../tensorflow/tensorflow/contrib/makefile/downloads/eigen",
+					"$(SRCROOT)/../../tensorflow/tensorflow/contrib/makefile/gen/proto",
+					"$(SRCROOT)/../../tensorflow/tensorflow/contrib/makefile/downloads/protobuf/src",
+					"$(SRCROOT)/../../tensorflow/tensorflow/contrib/makefile/downloads/nsync/public",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
-				LIBRARY_SEARCH_PATHS = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LIBRARY_SEARCH_PATHS = "${inherited)";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-lc++",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SYSTEM_FRAMEWORK_SEARCH_PATHS = "";
+				SYSTEM_HEADER_SEARCH_PATHS = "";
+				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
 		};
@@ -283,13 +335,10 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				ENABLE_BITCODE = NO;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SRCROOT)/../../../ios/**",
-					"${BUILT_PRODUCTS_DIR}/**",
-					"$(SRCROOT)/../../ios/**",
-				);
+				FRAMEWORK_SEARCH_PATHS = "${BUILT_PRODUCTS_DIR}/**";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -298,16 +347,29 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/../../../React/**",
-					"$(SRCROOT)/../../react-native/React/**",
+					"$(SRCROOT)/../../opencv/modules/**",
+					"$(SRCROOT)/../../tensorflow",
+					"$(SRCROOT)/../../opencv/ios/build/build-arm64-iphoneos",
+					"$(SRCROOT)/../../opencv/ios/build/build-armv7s-iphoneos",
+					"$(SRCROOT)/../../opencv/ios/build/build-armv7-iphoneos",
+					"$(SRCROOT)/../../tensorflow/tensorflow/contrib/makefile/downloads/eigen",
+					"$(SRCROOT)/../../tensorflow/tensorflow/contrib/makefile/gen/proto",
+					"$(SRCROOT)/../../tensorflow/tensorflow/contrib/makefile/downloads/protobuf/src",
+					"$(SRCROOT)/../../tensorflow/tensorflow/contrib/makefile/downloads/nsync/public",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
-				LIBRARY_SEARCH_PATHS = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LIBRARY_SEARCH_PATHS = "${inherited)";
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-lc++",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SYSTEM_FRAMEWORK_SEARCH_PATHS = "";
+				SYSTEM_HEADER_SEARCH_PATHS = "";
+				USER_HEADER_SEARCH_PATHS = "";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
