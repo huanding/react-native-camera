@@ -2,13 +2,7 @@
 #import <React/RCTConvert.h>
 #import "RNCamera.h"
 #import "RNTensorflowManager.h"
-
-#ifdef __cplusplus
-#include <types_c.h>
-#import <opencv2/highgui/highgui.hpp>
-#import <opencv2/videoio/cap_ios.h>
-using namespace cv;
-#endif
+#import "ImageProcessor.h"
 
 @interface RNTensorflowManager() <AVCaptureVideoDataOutputSampleBufferDelegate> {
     dispatch_queue_t videoDataOutputQueue;
@@ -23,6 +17,7 @@ using namespace cv;
 @property (nonatomic, weak) AVCaptureVideoPreviewLayer *previewLayer;
 @property (nonatomic, assign, getter=isEnabled) BOOL enabled;
 @property (atomic) BOOL isProcessingFrame;
+@property (nonatomic, weak) ImageProcessor * imageProcessor;
 @end
 
 @implementation RNTensorflowManager
@@ -34,9 +29,9 @@ using namespace cv;
 
 + (NSDictionary *)constants
 {
-    return @{@"Mode" : @{},
-             @"Landmarks" : @{},
-             @"Classifications" : @{}};
+    return @{@"Model" : @{},
+             @"Label" : @{},
+             };
 }
 
 - (instancetype)initWithSessionQueue:(dispatch_queue_t)sessionQueue delegate:(id <RNTensorflowDelegate>)delegate
@@ -44,6 +39,7 @@ using namespace cv;
     if (self = [super init]) {
         _delegate = delegate;
         _sessionQueue = sessionQueue;
+        _imageProcessor = [[ImageProcessor alloc] initWithData:@"modelUri" labels:@"labelUri"];
     }
     return self;
 }
@@ -111,7 +107,9 @@ using namespace cv;
                 _connected = true;
             }
 
-            [self _notifyOfFaces:nil];
+            [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceDidRotate:) name:UIDeviceOrientationDidChangeNotification object:nil];
+            deviceOrientation = [[UIDevice currentDevice] orientation];
         } @catch (NSException *exception) {
             RCTLogWarn(@"%@", [exception description]);
         }
@@ -136,10 +134,6 @@ using namespace cv;
     }
 
     [_session commitConfiguration];
-
-    if ([self isEnabled]) {
-        [self _notifyOfFaces:nil];
-    }
 }
 
 # pragma mark Private API
@@ -154,14 +148,15 @@ using namespace cv;
     }
 }
 
-- (void)_notifyOfFaces:(NSArray<NSDictionary *> *)faces
+- (void)deviceDidRotate:(NSNotification *)notification
 {
-    NSArray<NSDictionary *> *reportableFaces = faces == nil ? @[] : faces;
-    if ([reportableFaces count] > 0) {
-        if (_delegate) {
-            [_delegate onItemsDetected:reportableFaces];
-        }
+    UIDeviceOrientation currentOrientation = [[UIDevice currentDevice] orientation];
+
+    // Ignore changes in device orientation if unknown, face up, or face down.
+    if (!UIDeviceOrientationIsValidInterfaceOrientation(currentOrientation)) {
+        return;
     }
+    deviceOrientation = currentOrientation;
 }
 
 # pragma mark - Utilities
@@ -170,24 +165,6 @@ using namespace cv;
 {
     if (_sessionQueue) {
         dispatch_async(_sessionQueue, block);
-    }
-}
-
-#pragma mark - OpenCV
-
-void rot90(cv::Mat &matImage, int rotflag) {
-    // 1=CW, 2=CCW, 3=180
-    if (rotflag == 1) {
-        // transpose+flip(1)=CW
-        transpose(matImage, matImage);
-        flip(matImage, matImage, 1);
-    } else if (rotflag == 2) {
-        // transpose+flip(0)=CCW
-        transpose(matImage, matImage);
-        flip(matImage, matImage, 0);
-    } else if (rotflag == 3){
-        // flip(-1)=180
-        flip(matImage, matImage, -1);
     }
 }
 
@@ -203,44 +180,13 @@ void rot90(cv::Mat &matImage, int rotflag) {
         CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
         CVPixelBufferLockBaseAddress(imageBuffer, 0);
 
-        // Y_PLANE
-        int plane = 0;
-        char *planeBaseAddress = (char *)CVPixelBufferGetBaseAddressOfPlane(imageBuffer, plane);
-
-        size_t width = CVPixelBufferGetWidthOfPlane(imageBuffer, plane);
-        size_t height = CVPixelBufferGetHeightOfPlane(imageBuffer, plane);
-        size_t bytesPerRow = CVPixelBufferGetBytesPerRowOfPlane(imageBuffer, plane);
-
-        int numChannels = 3;
-
-        cv::Mat src = cv::Mat(cvSize((int)width, (int)height), CV_8UC(numChannels), planeBaseAddress, (int)bytesPerRow);
-        int rotate = 0;
-        if (deviceOrientation == UIDeviceOrientationPortrait) {
-            rotate = 1;
-        } else if (deviceOrientation == UIDeviceOrientationLandscapeRight) {
-            rotate = 3;
-        } else if (deviceOrientation == UIDeviceOrientationPortraitUpsideDown) {
-            rotate = 2;
+        NSArray<NSDictionary *> * result = [_imageProcessor recognizeFrame:imageBuffer orientation:deviceOrientation];
+        if (_delegate) {
+            [_delegate onItemsDetected:result];
         }
-        rot90(src, rotate);
 
-//        [[PlateScanner sharedInstance] scanImage:src onSuccess:^(PlateResult *result) {
-//            if (result && self.camera.onPlateRecognized) {
-//                self.camera.onPlateRecognized(@{
-//                    @"confidence": @(result.confidence),
-//                    @"plate": result.plate
-//                });
-//            }
-//
-//            CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
-//            self.isProcessingFrame = NO;
-//
-//            [self _notifyOfFaces:encodedFaces];
-//
-//        } onFailure:^(NSError *err) {
-//            CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
-//            self.isProcessingFrame = NO;
-//        }];
+        CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
+        self.isProcessingFrame = NO;
     }
 }
 

@@ -22,6 +22,7 @@
 @property (nonatomic, copy) RCTDirectEventBlock onMountError;
 @property (nonatomic, copy) RCTDirectEventBlock onBarCodeRead;
 @property (nonatomic, copy) RCTDirectEventBlock onFacesDetected;
+@property (nonatomic, copy) RCTDirectEventBlock onItemsDetected;
 
 @end
 
@@ -826,6 +827,13 @@ static NSDictionary *defaultFaceDetectorOptions = nil;
     }
 
     return nil;
+}
+
+- (void)onItemsDetected:(NSArray<NSDictionary *> *) items
+{
+    if (_onItemsDetected) {
+        _onItemsDetected(@{@"items": items});
+    }
 }
 
 @end

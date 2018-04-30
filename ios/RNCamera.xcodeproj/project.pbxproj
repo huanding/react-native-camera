@@ -290,11 +290,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/../../opencv/modules/**",
 					"$(SRCROOT)/../../tensorflow",
-					"$(SRCROOT)/../../opencv/ios/build/build-arm64-iphoneos",
-					"$(SRCROOT)/../../opencv/ios/build/build-armv7s-iphoneos",
-					"$(SRCROOT)/../../opencv/ios/build/build-armv7-iphoneos",
 					"$(SRCROOT)/../../tensorflow/tensorflow/contrib/makefile/downloads/eigen",
 					"$(SRCROOT)/../../tensorflow/tensorflow/contrib/makefile/gen/proto",
 					"$(SRCROOT)/../../tensorflow/tensorflow/contrib/makefile/downloads/protobuf/src",
@@ -347,11 +343,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/../../opencv/modules/**",
 					"$(SRCROOT)/../../tensorflow",
-					"$(SRCROOT)/../../opencv/ios/build/build-arm64-iphoneos",
-					"$(SRCROOT)/../../opencv/ios/build/build-armv7s-iphoneos",
-					"$(SRCROOT)/../../opencv/ios/build/build-armv7-iphoneos",
 					"$(SRCROOT)/../../tensorflow/tensorflow/contrib/makefile/downloads/eigen",
 					"$(SRCROOT)/../../tensorflow/tensorflow/contrib/makefile/gen/proto",
 					"$(SRCROOT)/../../tensorflow/tensorflow/contrib/makefile/downloads/protobuf/src",

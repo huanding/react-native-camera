@@ -9,7 +9,12 @@
 #import "RNFaceDetectorManagerStub.h"
 #endif
 
+#if __has_include("RNTensorflowManager.h")
+#import "RNTensorflowManager.h"
+#else
 #import "RNTensorflowManagerStub.h"
+#endif
+
 
 @class RNCamera;
 
@@ -53,6 +58,7 @@
 - (void)onMountingError:(NSDictionary *)event;
 - (void)onCodeRead:(NSDictionary *)event;
 - (void)onFacesDetected:(NSDictionary *)event;
+- (void)onItemsDetected:(NSDictionary *)event;
 
 @end
 
