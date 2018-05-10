@@ -1,8 +1,13 @@
-
 #import <React/RCTConvert.h>
+#import <React/RCTLog.h>
+
 #import "RNCamera.h"
 #import "RNTensorflowManager.h"
 #import "ImageProcessor.h"
+
+#include "tensorflow/core/public/session.h"
+#include <string>
+#include <fstream>
 
 @interface RNTensorflowManager() <AVCaptureVideoDataOutputSampleBufferDelegate> {
     dispatch_queue_t videoDataOutputQueue;
@@ -17,7 +22,10 @@
 @property (nonatomic, weak) AVCaptureVideoPreviewLayer *previewLayer;
 @property (nonatomic, assign, getter=isEnabled) BOOL enabled;
 @property (atomic) BOOL isProcessingFrame;
-@property (nonatomic, weak) ImageProcessor * imageProcessor;
+@property (nonatomic, strong) ImageProcessor * imageProcessor;
+@property (nonatomic, strong) NSString * model;
+@property (nonatomic, strong) NSString * labels;
+
 @end
 
 @implementation RNTensorflowManager
@@ -39,7 +47,6 @@
     if (self = [super init]) {
         _delegate = delegate;
         _sessionQueue = sessionQueue;
-        _imageProcessor = [[ImageProcessor alloc] initWithData:@"modelUri" labels:@"labelUri"];
     }
     return self;
 }
@@ -58,6 +65,7 @@
     BOOL newEnabled = [RCTConvert BOOL:json];
 
     if ([self isEnabled] != newEnabled) {
+        _enabled = newEnabled;
         [self _runBlockIfQueueIsPresent:^{
             if ([self isEnabled]) {
                 if (_dataOutput) {
@@ -72,12 +80,25 @@
     }
 }
 
+- (void)setModel:(id)json
+{
+    _model = [RCTConvert NSString:json];
+}
+- (void)setLabels:(id)json
+{
+    _labels = [RCTConvert NSString:json];
+}
+
 # pragma mark - Public API
 
 - (void)startSession:(AVCaptureSession *)session withPreviewLayer:(AVCaptureVideoPreviewLayer *)previewLayer
 {
     _session = session;
     _previewLayer = previewLayer;
+    _imageProcessor = [[ImageProcessor alloc] initWithData:_model labels:_labels];
+
+    LOG(INFO) << "Attempting to start tensorflow session";
+
     [self tryEnabling];
 }
 
@@ -179,7 +200,7 @@
 
         CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
         CVPixelBufferLockBaseAddress(imageBuffer, 0);
-
+        [_imageProcessor reset];
         NSArray<NSDictionary *> * result = [_imageProcessor recognizeFrame:imageBuffer orientation:deviceOrientation];
         if (_delegate) {
             [_delegate onItemsDetected:result];

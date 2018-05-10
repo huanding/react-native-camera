@@ -18,7 +18,7 @@
 
 @class RNCamera;
 
-@interface RNCamera : UIView <AVCaptureMetadataOutputObjectsDelegate, AVCaptureFileOutputRecordingDelegate, RNFaceDetectorDelegate>
+@interface RNCamera : UIView <AVCaptureMetadataOutputObjectsDelegate, AVCaptureFileOutputRecordingDelegate, RNFaceDetectorDelegate, RNTensorflowDelegate>
 
 @property(nonatomic, strong) dispatch_queue_t sessionQueue;
 @property(nonatomic, strong) AVCaptureSession *session;
@@ -29,6 +29,8 @@
 @property(nonatomic, strong) id runtimeErrorHandlingObserver;
 @property(nonatomic, strong) AVCaptureVideoPreviewLayer *previewLayer;
 @property(nonatomic, strong) NSArray *barCodeTypes;
+@property (nonatomic, strong) NSString *model;
+@property (nonatomic, strong) NSString *labels;
 
 @property(nonatomic, assign) NSInteger presetCamera;
 @property (assign, nonatomic) NSInteger flashMode;
@@ -50,6 +52,8 @@
 - (void)updateFaceDetectionMode:(id)requestedMode;
 - (void)updateFaceDetectionLandmarks:(id)requestedLandmarks;
 - (void)updateFaceDetectionClassifications:(id)requestedClassifications;
+- (void)updateModel:(id)model;
+- (void)updateLabels:(id)labels;
 - (void)takePicture:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 - (void)record:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 - (void)stopRecording;

@@ -59,7 +59,7 @@ RCT_EXPORT_VIEW_PROPERTY(onItemsDetected, RCTDirectEventBlock);
              @"VideoCodec": [[self class] validCodecTypes],
              @"BarCodeType" : [[self class] validBarCodeTypes],
              @"FaceDetection" : [[self  class] faceDetectorConstants],
-             @"tensorflow" : [[self  class] tensorflowConstants],
+             @"Tensorflow" : [[self  class] tensorflowConstants],
              };
 }
 
@@ -195,6 +195,16 @@ RCT_CUSTOM_VIEW_PROPERTY(barCodeScannerEnabled, BOOL, RNCamera)
 RCT_CUSTOM_VIEW_PROPERTY(barCodeTypes, NSArray, RNCamera)
 {
     [view setBarCodeTypes:[RCTConvert NSArray:json]];
+}
+
+RCT_CUSTOM_VIEW_PROPERTY(model, NSString, RNCamera)
+{
+    [view updateModel:json];
+}
+
+RCT_CUSTOM_VIEW_PROPERTY(labels, NSString, RNCamera)
+{
+    [view updateLabels:json];
 }
 
 RCT_REMAP_METHOD(takePicture,

@@ -32,6 +32,7 @@ static NSDictionary *defaultFaceDetectorOptions = nil;
 
 - (id)initWithBridge:(RCTBridge *)bridge
 {
+    RCTLogInfo(@"RNCamera called!");
     if ((self = [super init])) {
         self.bridge = bridge;
         self.session = [AVCaptureSession new];
@@ -309,6 +310,16 @@ static NSDictionary *defaultFaceDetectorOptions = nil;
 }
 #endif
 
+- (void)updateModel:(id)model
+{
+    [_tensorflowManager setModel:model];
+}
+- (void)updateLabels:(id)labels
+{
+    [_tensorflowManager setLabels:labels];
+}
+
+
 - (void)takePicture:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject
 {
     AVCaptureConnection *connection = [self.stillImageOutput connectionWithMediaType:AVMediaTypeVideo];
@@ -383,6 +394,7 @@ static NSDictionary *defaultFaceDetectorOptions = nil;
 
 - (void)record:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject
 {
+    RCTLogInfo(@"RNCamera record called!");
     if (_movieFileOutput == nil) {
         // At the time of writing AVCaptureMovieFileOutput and AVCaptureVideoDataOutput (> GMVDataOutput)
         // cannot coexist on the same AVSession (see: https://stackoverflow.com/a/4986032/1123156).

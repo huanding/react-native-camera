@@ -100,6 +100,9 @@ export interface RNCameraProps {
 
     /** iOS Only */
     captureAudio?: boolean;
+
+    model?: string;
+    labels?: string;
 }
 
 interface Point<T = number> {
