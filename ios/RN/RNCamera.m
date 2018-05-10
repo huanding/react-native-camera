@@ -319,6 +319,10 @@ static NSDictionary *defaultFaceDetectorOptions = nil;
     [_tensorflowManager setLabels:labels];
 }
 
+- (void)updateTensorflowEnabled:(id)isEnabled
+{
+    [_tensorflowManager setIsEnabled:isEnabled];
+}
 
 - (void)takePicture:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject
 {

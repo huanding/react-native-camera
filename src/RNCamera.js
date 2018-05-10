@@ -79,6 +79,7 @@ type PropsType = typeof View.props & {
   type?: number | string,
   onCameraReady?: Function,
   onBarCodeRead?: Function,
+  onItemsDetected?: Function,
   onGoogleVisionBarcodesDetected?: Function,
   faceDetectionMode?: number,
   flashMode?: number | string,
@@ -332,6 +333,7 @@ export default class Camera extends React.Component<PropsType, StateType> {
             this.props.onGoogleVisionBarcodesDetected,
           )}
           onBarCodeRead={this._onObjectDetected(this.props.onBarCodeRead)}
+          onItemsDetected={this._onObjectDetected(this.props.onItemsDetected)}
           onFacesDetected={this._onObjectDetected(this.props.onFacesDetected)}
           onTextRecognized={this._onObjectDetected(this.props.onTextRecognized)}
         />
@@ -348,6 +350,10 @@ export default class Camera extends React.Component<PropsType, StateType> {
 
     if (props.onBarCodeRead) {
       newProps.barCodeScannerEnabled = true;
+    }
+
+    if (props.onItemsDetected) {
+      newProps.tensorflowEnabled = true;
     }
 
     if (props.onGoogleVisionBarcodesDetected) {
@@ -389,11 +395,13 @@ const RNCamera = requireNativeComponent('RNCamera', Camera, {
     accessibilityLabel: true,
     accessibilityLiveRegion: true,
     barCodeScannerEnabled: true,
+    tensorflowEnabled: true,
     googleVisionBarcodeDetectorEnabled: true,
     faceDetectorEnabled: true,
     textRecognizerEnabled: true,
     importantForAccessibility: true,
     onBarCodeRead: true,
+    onItemsDetected: true,
     onGoogleVisionBarcodesDetected: true,
     onCameraReady: true,
     onFaceDetected: true,

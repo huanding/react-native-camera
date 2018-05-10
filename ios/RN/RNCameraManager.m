@@ -207,6 +207,11 @@ RCT_CUSTOM_VIEW_PROPERTY(labels, NSString, RNCamera)
     [view updateLabels:json];
 }
 
+RCT_CUSTOM_VIEW_PROPERTY(tensorflowEnabled, BOOL, RNCamera)
+{
+    [view updateTensorflowEnabled:json];
+}
+
 RCT_REMAP_METHOD(takePicture,
                  options:(NSDictionary *)options
                  reactTag:(nonnull NSNumber *)reactTag

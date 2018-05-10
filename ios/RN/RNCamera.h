@@ -54,6 +54,7 @@
 - (void)updateFaceDetectionClassifications:(id)requestedClassifications;
 - (void)updateModel:(id)model;
 - (void)updateLabels:(id)labels;
+- (void)updateTensorflowEnabled:(id)isEnabled;
 - (void)takePicture:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 - (void)record:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 - (void)stopRecording;
