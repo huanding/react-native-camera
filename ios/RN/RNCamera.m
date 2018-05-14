@@ -32,7 +32,7 @@ static NSDictionary *defaultFaceDetectorOptions = nil;
 
 - (id)initWithBridge:(RCTBridge *)bridge
 {
-    RCTLogInfo(@"RNCamera called!");
+    RCTLogInfo(@"Initializing RNCamera");
     if ((self = [super init])) {
         self.bridge = bridge;
         self.session = [AVCaptureSession new];
@@ -398,7 +398,6 @@ static NSDictionary *defaultFaceDetectorOptions = nil;
 
 - (void)record:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject
 {
-    RCTLogInfo(@"RNCamera record called!");
     if (_movieFileOutput == nil) {
         // At the time of writing AVCaptureMovieFileOutput and AVCaptureVideoDataOutput (> GMVDataOutput)
         // cannot coexist on the same AVSession (see: https://stackoverflow.com/a/4986032/1123156).

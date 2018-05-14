@@ -1,28 +1,23 @@
 #import "URLHelper.h"
 
-#include "tensorflow/core/public/session.h"
+#import <React/RCTLog.h>
 
-#include <string>
-#include <fstream>
-
-@implementation URLHelper
-{
-}
+@implementation URLHelper {}
 
 + (NSURL *) toURL: (NSString *) uri
 {
-    LOG(INFO) << "Attempting to load " << [uri UTF8String];
+    RCTLogInfo(@"Attempting to load %@", uri);
 
     NSURL * url = [NSURL URLWithString:uri];
     if (url && url.scheme && url.host) {
-        LOG(INFO) << "Loading URL " << [[url absoluteString] UTF8String];
+        RCTLogInfo(@"Loading URL %@", [url absoluteString]);
         return url;
     }
 
     if ([[NSFileManager defaultManager] fileExistsAtPath:uri]) {
         url = [NSURL fileURLWithPath:uri];
         if (url && url.scheme) {
-            LOG(INFO) << "Loading file " << [[url absoluteString] UTF8String];
+            RCTLogInfo(@"Loading file  %@", [url absoluteString]);
             return url;
         }
     }
@@ -33,7 +28,7 @@
     if (path) {
         url = [NSURL fileURLWithPath:path];
         if (url && url.scheme) {
-            LOG(INFO) << "Loading resource " << [[url absoluteString] UTF8String];
+            RCTLogInfo(@"Loading resource %@", [url absoluteString]);
             return url;
         }
     }
