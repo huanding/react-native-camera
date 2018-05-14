@@ -78,7 +78,21 @@ function convertNativeProps(props) {
     newProps.barCodeTypes = [];
   }
 
+
+  if (typeof props.model === 'string') {
+    newProps.model = props.model;
+  }
+
+  if (typeof props.labels === 'string') {
+    newProps.labels = props.labels;
+  }
+
   newProps.barcodeScannerEnabled = typeof props.onBarCodeRead === 'function';
+
+  if (typeof props.onItemsDetected !== 'function') {
+    newProps.onItemsDetected = []
+  }
+  newProps.tensorflowEnabled = typeof props.onItemsDetected === 'function';
 
   return newProps;
 }
@@ -125,6 +139,10 @@ export default class Camera extends Component {
     permissionDialogMessage: PropTypes.string,
     notAuthorizedView: PropTypes.element,
     pendingAuthorizationView: PropTypes.element,
+    model: PropTypes.string,
+    labels: PropTypes.string,
+    onItemsDetected: PropTypes.func,
+    tensorflowEnabled: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -289,6 +307,12 @@ export default class Camera extends Component {
   _onBarCodeRead = data => {
     if (this.props.onBarCodeRead) {
       this.props.onBarCodeRead(data);
+    }
+  };
+
+  _onItemsDetected = data => {
+    if (this.props.onItemsDetected) {
+      this.props.onItemsDetected(data);
     }
   };
 

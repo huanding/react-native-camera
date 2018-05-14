@@ -314,6 +314,16 @@ RCT_CUSTOM_VIEW_PROPERTY(captureAudio, BOOL, RCTCamera) {
   }
 }
 
+RCT_CUSTOM_VIEW_PROPERTY(model, NSString, RCTCamera)
+{
+  self.model = json;
+}
+
+RCT_CUSTOM_VIEW_PROPERTY(labels, NSString, RCTCamera)
+{
+  self.labels = json;
+}
+
 - (NSArray *)customBubblingEventTypes
 {
     return @[
@@ -545,7 +555,7 @@ RCT_EXPORT_METHOD(setZoom:(CGFloat)zoomFactor) {
     [self.session beginConfiguration];
 
     NSError *error = nil;
-      
+
     AVCaptureDevice *currentCaptureDevice = [self.videoCaptureDeviceInput device];
     AVCaptureDevice *captureDevice;
 
@@ -580,7 +590,7 @@ RCT_EXPORT_METHOD(setZoom:(CGFloat)zoomFactor) {
       else if (type == AVMediaTypeVideo) {
         [NSNotificationCenter.defaultCenter removeObserver:self name:AVCaptureDeviceSubjectAreaDidChangeNotification object:currentCaptureDevice];
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(subjectAreaDidChange:) name:AVCaptureDeviceSubjectAreaDidChangeNotification object:captureDevice];
-          
+
         self.videoCaptureDeviceInput = captureDeviceInput;
         [self setFlashMode];
       }
@@ -1018,7 +1028,7 @@ didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL
 {
   CGPoint devicePoint = CGPointMake(.5, .5);
   [self focusWithMode:AVCaptureFocusModeContinuousAutoFocus exposeWithMode:AVCaptureExposureModeContinuousAutoExposure atDevicePoint:devicePoint monitorSubjectAreaChange:NO];
-    
+
   if (self.camera.camFocus)
   {
     [self.camera.camFocus removeFromSuperview];
