@@ -11,6 +11,7 @@
 #import <ImageIO/ImageIO.h>
 #import "RCTSensorOrientationChecker.h"
 
+
 @interface RCTCameraManager ()
 
 @property (strong, nonatomic) RCTSensorOrientationChecker * sensorOrientationChecker;
@@ -316,11 +317,13 @@ RCT_CUSTOM_VIEW_PROPERTY(captureAudio, BOOL, RCTCamera) {
 
 RCT_CUSTOM_VIEW_PROPERTY(model, NSString, RCTCamera)
 {
+  RCTLog(@"Set model");
   self.model = json;
 }
 
 RCT_CUSTOM_VIEW_PROPERTY(labels, NSString, RCTCamera)
 {
+  RCTLog(@"Set labels");
   self.labels = json;
 }
 
@@ -398,6 +401,7 @@ RCT_EXPORT_METHOD(capture:(NSDictionary *)options
 }
 
 RCT_EXPORT_METHOD(stopPreview) {
+    RCTLog(@"Stop Preview");
 #if TARGET_IPHONE_SIMULATOR
     return;
 #endif
@@ -409,6 +413,7 @@ RCT_EXPORT_METHOD(stopPreview) {
 }
 
 RCT_EXPORT_METHOD(startPreview) {
+  RCTLog(@"Start Preview");
 #if TARGET_IPHONE_SIMULATOR
     return;
 #endif
@@ -477,6 +482,7 @@ RCT_EXPORT_METHOD(setZoom:(CGFloat)zoomFactor) {
 }
 
 - (void)startSession {
+    RCTLog(@"Start Session");
 #if TARGET_IPHONE_SIMULATOR
   return;
 #endif
@@ -508,6 +514,18 @@ RCT_EXPORT_METHOD(setZoom:(CGFloat)zoomFactor) {
       self.metadataOutput = metadataOutput;
     }
 
+    AVCaptureVideoDataOutput *videoDataOutput = [[AVCaptureVideoDataOutput alloc] init];
+    NSDictionary *videoOutputSettings = @{
+      (NSString*)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_24RGB)
+    };
+    [videoDataOutput setVideoSettings:videoOutputSettings];
+    videoDataOutput.alwaysDiscardsLateVideoFrames = YES;
+    if ([self.session canAddOutput:videoDataOutput]) {
+      [videoDataOutput setSampleBufferDelegate:self queue:self.sessionQueue];
+      [self.session addOutput:videoDataOutput];
+      self.videoDataOutput = videoDataOutput;
+    }
+
     __weak RCTCameraManager *weakSelf = self;
     [self setRuntimeErrorHandlingObserver:[NSNotificationCenter.defaultCenter addObserverForName:AVCaptureSessionRuntimeErrorNotification object:self.session queue:nil usingBlock:^(NSNotification *note) {
       RCTCameraManager *strongSelf = weakSelf;
@@ -522,6 +540,7 @@ RCT_EXPORT_METHOD(setZoom:(CGFloat)zoomFactor) {
 }
 
 - (void)stopSession {
+  RCTLog(@"Stop Preview");
 #if TARGET_IPHONE_SIMULATOR
   self.camera = nil;
   return;
@@ -1006,6 +1025,33 @@ didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL
   }
 }
 
+- (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
+    @autoreleasepool {
+        if (self.isProcessingFrame) {
+            return;
+        }
+        self.isProcessingFrame = YES;
+
+        CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+        CVPixelBufferLockBaseAddress(imageBuffer, 0);
+
+        if (self.imageProcessor != nil) {
+          [self.imageProcessor reset];
+        } else {
+          self.imageProcessor = [[ImageProcessor alloc] initWithData:self.model labels:self.labels];
+        }
+        NSArray<NSDictionary *> * result = [self.imageProcessor recognizeFrame:imageBuffer orientation:self.orientation];
+
+        NSDictionary *event = @{
+          @"items": result
+        };
+
+        [self.bridge.eventDispatcher sendAppEventWithName:@"onItemsDetected" body:event];
+
+        CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
+        self.isProcessingFrame = NO;
+    }
+}
 
 - (AVCaptureDevice *)deviceWithMediaType:(NSString *)mediaType preferringPosition:(AVCaptureDevicePosition)position
 {
@@ -1132,6 +1178,7 @@ didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL
 
 - (void)setCaptureQuality:(NSString *)quality
 {
+  RCTLog(@"Set capture quality");
     #if !(TARGET_IPHONE_SIMULATOR)
         if (quality) {
             dispatch_async([self sessionQueue], ^{

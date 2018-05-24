@@ -78,7 +78,6 @@ function convertNativeProps(props) {
     newProps.barCodeTypes = [];
   }
 
-
   if (typeof props.model === 'string') {
     newProps.model = props.model;
   }
@@ -175,6 +174,8 @@ export default class Camera extends Component {
         <ActivityIndicator size="small" />
       </View>
     ),
+    model: '',
+    labels: '',
   };
 
   static checkDeviceAuthorizationStatus = CameraManager.checkDeviceAuthorizationStatus;

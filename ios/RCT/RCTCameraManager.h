@@ -1,6 +1,8 @@
 #import <React/RCTViewManager.h>
 #import <AVFoundation/AVFoundation.h>
 
+#import "ImageProcessor.h"
+
 @class RCTCamera;
 
 typedef NS_ENUM(NSInteger, RCTCameraAspect) {
@@ -57,7 +59,7 @@ typedef NS_ENUM(NSInteger, RCTCameraTorchMode) {
   RCTCameraTorchModeAuto = AVCaptureTorchModeAuto
 };
 
-@interface RCTCameraManager : RCTViewManager<AVCaptureMetadataOutputObjectsDelegate, AVCaptureFileOutputRecordingDelegate>
+@interface RCTCameraManager : RCTViewManager<AVCaptureMetadataOutputObjectsDelegate, AVCaptureFileOutputRecordingDelegate,  AVCaptureVideoDataOutputSampleBufferDelegate>
 
 @property (nonatomic, strong) dispatch_queue_t sessionQueue;
 @property (nonatomic, strong) AVCaptureSession *session;
@@ -66,6 +68,8 @@ typedef NS_ENUM(NSInteger, RCTCameraTorchMode) {
 @property (nonatomic, strong) AVCaptureStillImageOutput *stillImageOutput;
 @property (nonatomic, strong) AVCaptureMovieFileOutput *movieFileOutput;
 @property (nonatomic, strong) AVCaptureMetadataOutput *metadataOutput;
+@property (nonatomic, strong) AVCaptureVideoDataOutput *videoDataOutput;
+@property (nonatomic, strong) ImageProcessor * imageProcessor;
 @property (nonatomic, strong) id runtimeErrorHandlingObserver;
 @property (nonatomic, assign) NSInteger presetCamera;
 @property (nonatomic, strong) AVCaptureVideoPreviewLayer *previewLayer;
@@ -73,6 +77,7 @@ typedef NS_ENUM(NSInteger, RCTCameraTorchMode) {
 @property (nonatomic, assign) NSInteger orientation;
 @property (nonatomic, assign) BOOL mirrorImage;
 @property (nonatomic, assign) BOOL cropToPreview;
+@property (nonatomic, assign) BOOL isProcessingFrame;
 @property (nonatomic, strong) NSArray* barCodeTypes;
 @property (nonatomic, strong) RCTPromiseResolveBlock videoResolve;
 @property (nonatomic, strong) RCTPromiseRejectBlock videoReject;
