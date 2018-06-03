@@ -317,14 +317,17 @@ RCT_CUSTOM_VIEW_PROPERTY(captureAudio, BOOL, RCTCamera) {
 
 RCT_CUSTOM_VIEW_PROPERTY(model, NSString, RCTCamera)
 {
-  RCTLog(@"Set model");
   self.model = json;
 }
 
 RCT_CUSTOM_VIEW_PROPERTY(labels, NSString, RCTCamera)
 {
-  RCTLog(@"Set labels");
   self.labels = json;
+}
+
+RCT_CUSTOM_VIEW_PROPERTY(tensorflowEnabled, BOOL, RCTCamera)
+{
+  self.tensorflowEnabled = [RCTConvert BOOL:json];
 }
 
 - (NSArray *)customBubblingEventTypes
@@ -499,31 +502,41 @@ RCT_EXPORT_METHOD(setZoom:(CGFloat)zoomFactor) {
       self.stillImageOutput = stillImageOutput;
     }
 
-    AVCaptureMovieFileOutput *movieFileOutput = [[AVCaptureMovieFileOutput alloc] init];
-    if ([self.session canAddOutput:movieFileOutput])
-    {
-      [self.session addOutput:movieFileOutput];
-      self.movieFileOutput = movieFileOutput;
-    }
+    if (self.tensorflowEnabled) {
+      // AVCaptureMovieFileOutput conflicts with AVCaptureVideoDataOutput. Can only enable 1 of them
 
-    AVCaptureMetadataOutput *metadataOutput = [[AVCaptureMetadataOutput alloc] init];
-    if ([self.session canAddOutput:metadataOutput]) {
-      [metadataOutput setMetadataObjectsDelegate:self queue:self.sessionQueue];
-      [self.session addOutput:metadataOutput];
-      [metadataOutput setMetadataObjectTypes:self.barCodeTypes];
-      self.metadataOutput = metadataOutput;
-    }
+      RCTLog(@"Enabling tensorflow")
+      AVCaptureVideoDataOutput *videoDataOutput = [[AVCaptureVideoDataOutput alloc] init];
+      // Available formats
+      // kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
+      // kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
+      // kCVPixelFormatType_32BGRA
 
-    AVCaptureVideoDataOutput *videoDataOutput = [[AVCaptureVideoDataOutput alloc] init];
-    NSDictionary *videoOutputSettings = @{
-      (NSString*)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_24RGB)
-    };
-    [videoDataOutput setVideoSettings:videoOutputSettings];
-    videoDataOutput.alwaysDiscardsLateVideoFrames = YES;
-    if ([self.session canAddOutput:videoDataOutput]) {
-      [videoDataOutput setSampleBufferDelegate:self queue:self.sessionQueue];
-      [self.session addOutput:videoDataOutput];
-      self.videoDataOutput = videoDataOutput;
+      videoDataOutput.videoSettings =@{ (NSString *)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA) };
+      //videoDataOutput.minFrameDuration = CMTimeMake(1, 15);
+      videoDataOutput.alwaysDiscardsLateVideoFrames = YES;
+      if ([self.session canAddOutput:videoDataOutput]) {
+        self.sampleQueue = dispatch_queue_create("sampleQueue", NULL);
+        [videoDataOutput setSampleBufferDelegate:self queue:self.sampleQueue];
+        [self.session addOutput:videoDataOutput];
+        self.videoDataOutput = videoDataOutput;
+      }
+    } else {
+      RCTLog(@"Enabling video capture")
+      AVCaptureMovieFileOutput *movieFileOutput = [[AVCaptureMovieFileOutput alloc] init];
+      if ([self.session canAddOutput:movieFileOutput])
+      {
+        [self.session addOutput:movieFileOutput];
+        self.movieFileOutput = movieFileOutput;
+      }
+
+      AVCaptureMetadataOutput *metadataOutput = [[AVCaptureMetadataOutput alloc] init];
+      if ([self.session canAddOutput:metadataOutput]) {
+        [metadataOutput setMetadataObjectsDelegate:self queue:self.sessionQueue];
+        [self.session addOutput:metadataOutput];
+        [metadataOutput setMetadataObjectTypes:self.barCodeTypes];
+        self.metadataOutput = metadataOutput;
+      }
     }
 
     __weak RCTCameraManager *weakSelf = self;
@@ -540,7 +553,7 @@ RCT_EXPORT_METHOD(setZoom:(CGFloat)zoomFactor) {
 }
 
 - (void)stopSession {
-  RCTLog(@"Stop Preview");
+  RCTLog(@"Stop Session");
 #if TARGET_IPHONE_SIMULATOR
   self.camera = nil;
   return;
@@ -1025,12 +1038,16 @@ didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL
   }
 }
 
-- (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
+- (void)captureOutput:(AVCaptureOutput *)captureOutput
+didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
+       fromConnection:(AVCaptureConnection *)connection {
     @autoreleasepool {
         if (self.isProcessingFrame) {
+            RCTLogWarn(@"Already Processing Frame");
             return;
         }
         self.isProcessingFrame = YES;
+        RCTLog(@"Start processing frame");
 
         CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
         CVPixelBufferLockBaseAddress(imageBuffer, 0);
@@ -1040,6 +1057,7 @@ didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL
         } else {
           self.imageProcessor = [[ImageProcessor alloc] initWithData:self.model labels:self.labels];
         }
+        RCTLog(@"Tensorflow graph initialized");
         NSArray<NSDictionary *> * result = [self.imageProcessor recognizeFrame:imageBuffer orientation:self.orientation];
 
         NSDictionary *event = @{
@@ -1050,6 +1068,7 @@ didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL
 
         CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
         self.isProcessingFrame = NO;
+        RCTLog(@"Finished processing frame");
     }
 }
 
@@ -1178,7 +1197,6 @@ didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL
 
 - (void)setCaptureQuality:(NSString *)quality
 {
-  RCTLog(@"Set capture quality");
     #if !(TARGET_IPHONE_SIMULATOR)
         if (quality) {
             dispatch_async([self sessionQueue], ^{
