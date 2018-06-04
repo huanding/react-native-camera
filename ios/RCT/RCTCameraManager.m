@@ -505,7 +505,7 @@ RCT_EXPORT_METHOD(setZoom:(CGFloat)zoomFactor) {
     if (self.tensorflowEnabled) {
       // AVCaptureMovieFileOutput conflicts with AVCaptureVideoDataOutput. Can only enable 1 of them
 
-      RCTLog(@"Enabling tensorflow")
+      RCTLog(@"Enabling tensorflow");
       AVCaptureVideoDataOutput *videoDataOutput = [[AVCaptureVideoDataOutput alloc] init];
       // Available formats
       // kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
@@ -522,7 +522,7 @@ RCT_EXPORT_METHOD(setZoom:(CGFloat)zoomFactor) {
         self.videoDataOutput = videoDataOutput;
       }
     } else {
-      RCTLog(@"Enabling video capture")
+      RCTLog(@"Enabling video capture");
       AVCaptureMovieFileOutput *movieFileOutput = [[AVCaptureMovieFileOutput alloc] init];
       if ([self.session canAddOutput:movieFileOutput])
       {
