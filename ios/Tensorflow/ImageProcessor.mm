@@ -31,7 +31,7 @@
 
 - (void) reset
 {
-    inference = [[TensorFlowInference alloc] initWithModel:model];
+    [inference reset];
 }
 
 - (NSArray<NSDictionary *> *) recognizeFrame:(CVImageBufferRef)imageRef orientation:(UIDeviceOrientation)orientation

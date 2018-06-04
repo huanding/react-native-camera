@@ -11,5 +11,6 @@
 - (NSArray *) fetch:(NSString *)outputName;
 - (std::shared_ptr<tensorflow::GraphDef>) graph;
 - (tensorflow::Status) close;
+- (void) reset;
 
 @end

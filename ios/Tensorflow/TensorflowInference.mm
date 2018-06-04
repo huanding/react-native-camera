@@ -213,4 +213,11 @@ NSArray* convertFetchResult(tensorflow::Tensor *tensor) {
     return session->Close();
 }
 
+-(void) reset
+{
+    feedNames.clear();
+    feedTensors.clear();
+    fetchNames.clear();
+    fetchTensors.clear();
+}
 @end

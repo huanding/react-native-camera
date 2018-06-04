@@ -63,8 +63,6 @@
 
 - (id)initWithManager:(RCTCameraManager*)manager bridge:(RCTBridge *)bridge
 {
-  RCTLogInfo(@"Initializing RCTCamera");
-
   if ((self = [super init])) {
     self.manager = manager;
     self.bridge = bridge;
