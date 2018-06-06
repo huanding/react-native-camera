@@ -1057,14 +1057,11 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         } else {
           self.imageProcessor = [[ImageProcessor alloc] initWithData:self.model labels:self.labels];
         }
-        RCTLog(@"Tensorflow graph initialized");
         NSArray<NSDictionary *> * result = [self.imageProcessor recognizeFrame:imageBuffer orientation:self.orientation];
 
-        NSDictionary *event = @{
-          @"items": result
-        };
+        RCTLog(@"Result: %@", result);
 
-        [self.bridge.eventDispatcher sendAppEventWithName:@"onItemsDetected" body:event];
+        [self.bridge.eventDispatcher sendAppEventWithName:@"onItemsDetected" body:result];
 
         CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
         self.isProcessingFrame = NO;

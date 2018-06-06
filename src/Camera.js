@@ -202,6 +202,7 @@ export default class Camera extends Component {
     this._addOnBarCodeReadListener();
     this._addOnFocusChanged();
     this._addOnZoomChanged();
+    this._addOnItemsDetected();
 
     let { captureMode } = convertNativeProps({ captureMode: this.props.captureMode });
     let hasVideoAndAudio =
@@ -220,13 +221,14 @@ export default class Camera extends Component {
     this._removeOnBarCodeReadListener();
     this._removeOnFocusChanged();
     this._removeOnZoomChanged();
+    this._removeOnItemsDetected();
     if (this.state.isRecording) {
       this.stopCapture();
     }
   }
 
   componentWillReceiveProps(newProps) {
-    const { onBarCodeRead, onFocusChanged, onZoomChanged } = this.props;
+    const { onBarCodeRead, onFocusChanged, onZoomChanged, onItemsDetected } = this.props;
     if (onBarCodeRead !== newProps.onBarCodeRead) {
       this._addOnBarCodeReadListener(newProps);
     }
@@ -235,6 +237,9 @@ export default class Camera extends Component {
     }
     if (onZoomChanged !== !newProps.onZoomChanged) {
       this._addOnZoomChanged(newProps);
+    }
+    if (onItemsDetected !== !newProps.onItemsDetected) {
+      this._addOnItemsDetected(newProps);
     }
   }
 
@@ -261,6 +266,13 @@ export default class Camera extends Component {
       this.zoomListener = NativeAppEventEmitter.addListener('zoomChanged', onZoomChanged);
     }
   }
+  _addOnItemsDetected(props) {
+    if (Platform.OS === 'ios') {
+      const { onItemsDetected } = props || this.props;
+      this.itemsDetectedListener = NativeAppEventEmitter.addListener('itemsDetected', this._onItemsDetected);
+    }
+  }
+
   _removeOnBarCodeReadListener() {
     const listener = this.cameraBarCodeReadListener;
     if (listener) {
@@ -275,6 +287,12 @@ export default class Camera extends Component {
   }
   _removeOnZoomChanged() {
     const listener = this.zoomListener;
+    if (listener) {
+      listener.remove();
+    }
+  }
+  _removeOnItemsDetected() {
+    const listener = this.itemsDetectedListener;
     if (listener) {
       listener.remove();
     }
@@ -312,6 +330,7 @@ export default class Camera extends Component {
   };
 
   _onItemsDetected = data => {
+    console.log("Detected item event");
     if (this.props.onItemsDetected) {
       this.props.onItemsDetected(data);
     }
