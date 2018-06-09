@@ -330,7 +330,6 @@ export default class Camera extends Component {
   };
 
   _onItemsDetected = data => {
-    console.log("Detected item event");
     if (this.props.onItemsDetected) {
       this.props.onItemsDetected(data);
     }

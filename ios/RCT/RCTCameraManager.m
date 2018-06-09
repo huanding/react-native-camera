@@ -1058,10 +1058,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
           self.imageProcessor = [[ImageProcessor alloc] initWithData:self.model labels:self.labels];
         }
         NSArray<NSDictionary *> * result = [self.imageProcessor recognizeFrame:imageBuffer orientation:self.orientation];
-
-        RCTLog(@"Result: %@", result);
-
-        [self.bridge.eventDispatcher sendAppEventWithName:@"onItemsDetected" body:result];
+        [self.bridge.eventDispatcher sendAppEventWithName:@"itemsDetected" body:result];
 
         CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
         self.isProcessingFrame = NO;
