@@ -3,9 +3,7 @@
 #import "TensorFlowInference.h"
 
 #import <ImageIO/ImageIO.h>
-
-#include <string>
-#include <fstream>
+#import <React/RCTLog.h>
 
 @implementation ImageProcessor
 {
@@ -24,7 +22,7 @@
         inference = [[TensorFlowInference alloc] initWithModel:model];
         labels = loadLabels(labelUri);
         maxResults = 3;
-        threshold = 0.1;
+        threshold = 0.5;
     }
     return self;
 }
@@ -34,63 +32,14 @@
     [inference reset];
 }
 
-- (NSArray<NSDictionary *> *) recognizeFrame:(CVImageBufferRef)imageRef orientation:(UIDeviceOrientation)orientation
+- (void) close
 {
-    CIImage *ciImage = [CIImage imageWithCVPixelBuffer:imageRef];
-    CIContext *temporaryContext = [CIContext contextWithOptions:nil];
-    CGImageRef videoImage = [temporaryContext
-                             createCGImage:ciImage
-                             fromRect:CGRectMake(0, 0,
-                                CVPixelBufferGetWidth(imageRef),
-                                CVPixelBufferGetHeight(imageRef))];
-
-    NSArray * results = [self recognizeImage:videoImage orientation:toOrientation(orientation)];
-
-    CGImageRelease(videoImage);
-
-    return results;
-    // Y_PLANE
-    // int plane = 0;
-    // char *planeBaseAddress = (char *)CVPixelBufferGetBaseAddressOfPlane(imageBuffer, plane);
-
-    // size_t width = CVPixelBufferGetWidthOfPlane(imageBuffer, plane);
-    // size_t height = CVPixelBufferGetHeightOfPlane(imageBuffer, plane);
-    // size_t bytesPerRow = CVPixelBufferGetBytesPerRowOfPlane(imageBuffer, plane);
-
-    // int numChannels = 3;
-
-    // cv::Mat src = cv::Mat(cvSize((int)width, (int)height), CV_8UC(numChannels), planeBaseAddress, (int)bytesPerRow);
-    // int rotate = 0;
-    // if (deviceOrientation == UIDeviceOrientationPortrait) {
-    //     rotate = 1;
-    // } else if (deviceOrientation == UIDeviceOrientationLandscapeRight) {
-    //     rotate = 3;
-    // } else if (deviceOrientation == UIDeviceOrientationPortraitUpsideDown) {
-    //     rotate = 2;
-    // }
-    // rot90(src, rotate);
-    //    #pragma mark - OpenCV
-
-    // void rot90(cv::Mat &matImage, int rotflag) {
-    //     // 1=CW, 2=CCW, 3=180
-    //     if (rotflag == 1) {
-    //         // transpose+flip(1)=CW
-    //         transpose(matImage, matImage);
-    //         flip(matImage, matImage, 1);
-    //     } else if (rotflag == 2) {
-    //         // transpose+flip(0)=CCW
-    //         transpose(matImage, matImage);
-    //         flip(matImage, matImage, 0);
-    //     } else if (rotflag == 3){
-    //         // flip(-1)=180
-    //         flip(matImage, matImage, -1);
-    //     }
-    // }
+    [inference close];
 }
 
 - (NSArray<NSDictionary *> *) recognizeImage:(CGImageRef)imageRef orientation:(CGImagePropertyOrientation)orientation
 {
-    LOG(INFO) << "Process image with orientation " << orientation;
+    RCTLog(@"Process image with orientation %d", orientation);
     tensorflow::Tensor tensor = createImageTensor(imageRef, orientation);
     [inference feed:@"image_tensor" tensor:tensor];
 
@@ -143,8 +92,7 @@ tensorflow::Tensor createImageTensor(CGImageRef imageRef, CGImagePropertyOrienta
     int image_height;
     int image_channels;
     std::vector<tensorflow::uint8> image_data = imageAsVector(imageRef, orientation, &image_width, &image_height, &image_channels);
-
-    LOG(INFO) << "Processing image width:" << image_width << " height: " << image_height << " channels: " << image_channels;
+    RCTLog(@"Processing image width:%d, height:%d, channels:%d", image_width, image_height, image_channels);
 
     const int wanted_channels = 3;
     tensorflow::Tensor image_tensor(tensorflow::DT_UINT8, tensorflow::TensorShape({1, image_height, image_width, wanted_channels}));
@@ -258,23 +206,7 @@ std::vector<tensorflow::uint8> imageAsVector(
     *out_width = canvasw;
     *out_height = canvash;
     *out_channels = channels;
-
     return result;
-}
-
-CGImagePropertyOrientation toOrientation(UIDeviceOrientation orientation) {
-    switch(orientation) {
-        case UIDeviceOrientationPortrait:
-            return kCGImagePropertyOrientationUp;
-        case UIDeviceOrientationPortraitUpsideDown:
-            return kCGImagePropertyOrientationDown;
-        case UIDeviceOrientationLandscapeLeft:
-            return kCGImagePropertyOrientationLeft;
-        case UIDeviceOrientationLandscapeRight:
-            return kCGImagePropertyOrientationRight;
-        default:
-            return kCGImagePropertyOrientationUp;
-    }
 }
 
 NSDictionary * loadLabels(NSString * labelUri) {
@@ -284,7 +216,7 @@ NSDictionary * loadLabels(NSString * labelUri) {
         regularExpressionWithPattern:@"item\\s*\\{[^}]*?name:\\s*\"?([^}]+?)\"?\\s*id:\\s*([^}]+?)\\s*display_name:\\s*\"?([^}]+?)\"?\\s*\\}"
         options:NSRegularExpressionDotMatchesLineSeparators error:nil];
     NSArray * matches = [regex matchesInString:labelString options:0 range:NSMakeRange(0, [labelString length])];
-    LOG(INFO) << "Found " << [matches count] << " labels";
+    RCTLog(@"Found %d labels", (int)[matches count]);
     NSMutableDictionary * dict = [NSMutableDictionary dictionary];
 
     NSNumberFormatter * formatter = [[NSNumberFormatter alloc] init];

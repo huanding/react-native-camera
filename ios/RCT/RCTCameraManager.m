@@ -1,5 +1,7 @@
 #import "RCTCameraManager.h"
 #import "RCTCamera.h"
+#import "ImageHelper.h"
+
 #import <React/RCTBridge.h>
 #import <React/RCTEventDispatcher.h>
 #import <React/RCTUtils.h>
@@ -513,8 +515,14 @@ RCT_EXPORT_METHOD(setZoom:(CGFloat)zoomFactor) {
       // kCVPixelFormatType_32BGRA
 
       videoDataOutput.videoSettings =@{ (NSString *)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA) };
-      //videoDataOutput.minFrameDuration = CMTimeMake(1, 15);
       videoDataOutput.alwaysDiscardsLateVideoFrames = YES;
+      AVCaptureConnection *conn = [videoDataOutput connectionWithMediaType:AVMediaTypeVideo];
+      if ([conn isVideoMinFrameDurationSupported]){
+        [conn setVideoMinFrameDuration:CMTimeMake(1, 10)];
+      }
+      if ([conn isVideoMaxFrameDurationSupported]) {
+        [conn setVideoMaxFrameDuration:CMTimeMake(1, 10)];
+      }
       if ([self.session canAddOutput:videoDataOutput]) {
         self.sampleQueue = dispatch_queue_create("sampleQueue", NULL);
         [videoDataOutput setSampleBufferDelegate:self queue:self.sampleQueue];
@@ -1043,26 +1051,41 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
        fromConnection:(AVCaptureConnection *)connection {
     @autoreleasepool {
         if (self.isProcessingFrame) {
-            RCTLogWarn(@"Already Processing Frame");
             return;
         }
         self.isProcessingFrame = YES;
-        RCTLog(@"Start processing frame");
 
         CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
         CVPixelBufferLockBaseAddress(imageBuffer, 0);
+
+        CIImage *ciImage = [CIImage imageWithCVPixelBuffer:imageBuffer];
+        CIContext *temporaryContext = [CIContext contextWithOptions:nil];
+        CGImageRef videoImage = [temporaryContext
+          createCGImage:ciImage
+          fromRect:CGRectMake(0, 0,
+          CVPixelBufferGetWidth(imageBuffer),
+          CVPixelBufferGetHeight(imageBuffer))];
 
         if (self.imageProcessor != nil) {
           [self.imageProcessor reset];
         } else {
           self.imageProcessor = [[ImageProcessor alloc] initWithData:self.model labels:self.labels];
         }
-        NSArray<NSDictionary *> * result = [self.imageProcessor recognizeFrame:imageBuffer orientation:self.orientation];
-        [self.bridge.eventDispatcher sendAppEventWithName:@"itemsDetected" body:result];
+        NSArray<NSDictionary *> * items =
+            [self.imageProcessor recognizeImage:videoImage orientation:[ImageHelper toOrientation:self.orientation]];
 
+        NSString* timestamp = [ImageHelper toDateTime:CMSampleBufferGetPresentationTimeStamp(sampleBuffer)];
+        NSDictionary *event = @{
+          @"timestamp": timestamp,
+          @"image": [ImageHelper base64Image:videoImage],
+          @"items": items,
+        };
+
+        [self.bridge.eventDispatcher sendAppEventWithName:@"itemsDetected" body:event];
+        RCTLog(@"%@ sent item detected event with %d items", timestamp, (int)[items count]);
+        CGImageRelease(videoImage);
         CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
         self.isProcessingFrame = NO;
-        RCTLog(@"Finished processing frame");
     }
 }
 

@@ -4,6 +4,7 @@
 #import "RNCamera.h"
 #import "RNTensorflowManager.h"
 #import "ImageProcessor.h"
+#import "ImageHelper.h"
 
 #include "tensorflow/core/public/session.h"
 #include <string>
@@ -201,7 +202,14 @@
         CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
         CVPixelBufferLockBaseAddress(imageBuffer, 0);
         [_imageProcessor reset];
-        NSArray<NSDictionary *> * result = [_imageProcessor recognizeFrame:imageBuffer orientation:deviceOrientation];
+        CIImage *ciImage = [CIImage imageWithCVPixelBuffer:imageBuffer];
+        CIContext *temporaryContext = [CIContext contextWithOptions:nil];
+        CGImageRef videoImage = [temporaryContext
+                                 createCGImage:ciImage
+                                 fromRect:CGRectMake(0, 0,
+                                                     CVPixelBufferGetWidth(imageBuffer),
+                                                     CVPixelBufferGetHeight(imageBuffer))];
+        NSArray<NSDictionary *> * result = [_imageProcessor recognizeImage:videoImage orientation:[ImageHelper toOrientation:deviceOrientation]];
         if (_delegate) {
             [_delegate onItemsDetected:result];
         }

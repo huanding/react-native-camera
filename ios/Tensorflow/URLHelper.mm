@@ -6,18 +6,18 @@
 
 + (NSURL *) toURL: (NSString *) uri
 {
-    RCTLogInfo(@"Attempting to load %@", uri);
+    RCTLog(@"Attempting to load %@", uri);
 
     NSURL * url = [NSURL URLWithString:uri];
     if (url && url.scheme && url.host) {
-        RCTLogInfo(@"Loading URL %@", [url absoluteString]);
+        RCTLog(@"Loading URL %@", [url absoluteString]);
         return url;
     }
 
     if ([[NSFileManager defaultManager] fileExistsAtPath:uri]) {
         url = [NSURL fileURLWithPath:uri];
         if (url && url.scheme) {
-            RCTLogInfo(@"Loading file  %@", [url absoluteString]);
+            RCTLog(@"Loading file  %@", [url absoluteString]);
             return url;
         }
     }
@@ -28,7 +28,7 @@
     if (path) {
         url = [NSURL fileURLWithPath:path];
         if (url && url.scheme) {
-            RCTLogInfo(@"Loading resource %@", [url absoluteString]);
+            RCTLog(@"Loading resource %@", [url absoluteString]);
             return url;
         }
     }

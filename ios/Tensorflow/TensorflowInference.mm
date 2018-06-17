@@ -1,32 +1,11 @@
 #import "TensorFlowInference.h"
+#import "URLHelper.h"
 
-#include "URLHelper.h"
+#import <React/RCTLog.h>
+
+#include "tensorflow/core/framework/op_kernel.h"
 
 #include <string>
-#include <fstream>
-
-namespace {
-    class InputStream : public ::google::protobuf::io::CopyingInputStream {
-    public:
-        explicit InputStream(const std::string& file_name) : ifstream_(file_name.c_str(), std::ios::in | std::ios::binary) {
-        }
-
-        ~InputStream() {
-            ifstream_.close();
-        }
-
-        int Read(void* buffer, int size) {
-            if (!ifstream_) {
-                return -1;
-            }
-            ifstream_.read(static_cast<char*>(buffer), size);
-            return ifstream_.gcount();
-        }
-
-    private:
-        std::ifstream ifstream_;
-    };
-}
 
 @implementation TensorFlowInference
 {
@@ -51,7 +30,7 @@ namespace {
 - (id) initTensorFlow:(NSString *)modelLocation
 {
     tensorflow::GraphDef graph;
-    LOG(INFO) << "Creating graph for " << [modelLocation UTF8String];
+    RCTLog(@"Creating graph for %@", modelLocation);
 
     NSURL *url = [URLHelper toURL:modelLocation];
     NSData *data = [NSData dataWithContentsOfURL:url];
@@ -71,15 +50,15 @@ namespace {
         throw std::runtime_error(str.str());
     }
     std::shared_ptr<tensorflow::Session> sess(session_pointer);
-    LOG(INFO) << "Session created.";
 
-    LOG(INFO) << "Creating session.";
+    RCTLog(@"Creating session");
     tensorflow::Status s = sess->Create(graph);
     if (!s.ok()) {
         std::stringstream str;
         str << "Could not create TensorFlow Graph: " << s;
         throw std::runtime_error(str.str());
     }
+    RCTLog(@"Session created");
 
     session = sess;
     tensorflowGraph = std::make_shared<tensorflow::GraphDef>(graph);
@@ -198,19 +177,14 @@ NSArray* convertFetchResult(tensorflow::Tensor *tensor) {
 
 }
 
--(std::shared_ptr<tensorflow::GraphDef>) graph
-{
-    return tensorflowGraph;
-}
-
--(tensorflow::Status) close
+-(void) close
 {
     feedNames.clear();
     feedTensors.clear();
     fetchNames.clear();
     fetchTensors.clear();
 
-    return session->Close();
+    session->Close();
 }
 
 -(void) reset

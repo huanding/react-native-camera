@@ -1,6 +1,5 @@
 #include <UIKit/UIKit.h>
 
-#include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/public/session.h"
 
 @interface TensorFlowInference: NSObject
@@ -9,8 +8,7 @@
 - (void) feed:(NSString *)inputName tensor:(tensorflow::Tensor)tensor;
 - (void) run:(NSArray *)outputNames enableStats:(BOOL)enableStats;
 - (NSArray *) fetch:(NSString *)outputName;
-- (std::shared_ptr<tensorflow::GraphDef>) graph;
-- (tensorflow::Status) close;
+- (void) close;
 - (void) reset;
 
 @end
