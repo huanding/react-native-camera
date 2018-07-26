@@ -269,7 +269,10 @@ export default class Camera extends Component {
   _addOnItemsDetected(props) {
     if (Platform.OS === 'ios') {
       const { onItemsDetected } = props || this.props;
-      this.itemsDetectedListener = NativeAppEventEmitter.addListener('itemsDetected', this._onItemsDetected);
+      this._removeOnItemsDetected();
+      if (onItemsDetected) {
+        this.itemsDetectedListener = NativeAppEventEmitter.addListener('itemsDetected', this._onItemsDetected);
+      }
     }
   }
 

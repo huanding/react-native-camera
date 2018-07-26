@@ -18,9 +18,33 @@
     }
 }
 
++ (NSString *) toOrientationString:(CGImagePropertyOrientation)orientation {
+    switch(orientation) {
+        case kCGImagePropertyOrientationUp:
+            return @"kCGImagePropertyOrientationUp";
+        case kCGImagePropertyOrientationUpMirrored:
+            return @"kCGImagePropertyOrientationUpMirrored";
+        case kCGImagePropertyOrientationDown:
+            return @"kCGImagePropertyOrientationDown";
+        case kCGImagePropertyOrientationDownMirrored:
+            return @"kCGImagePropertyOrientationDownMirrored";
+        case kCGImagePropertyOrientationLeftMirrored:
+            return @"kCGImagePropertyOrientationLeftMirrored";
+        case kCGImagePropertyOrientationRight:
+            return @"kCGImagePropertyOrientationRight";
+        case kCGImagePropertyOrientationRightMirrored:
+            return @"kCGImagePropertyOrientationRightMirrored";
+        case kCGImagePropertyOrientationLeft:
+            return @"kCGImagePropertyOrientationLeft";
+        default:
+            return @"UnknownOrientation";
+    }
+}
+
 + (NSString *) base64Image:(CGImageRef)imageRef {
     UIImage* image = [[UIImage alloc] initWithCGImage:imageRef];
-    return [UIImagePNGRepresentation(image) base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithCarriageReturn];
+    NSString * base64 = [UIImagePNGRepresentation(image) base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithCarriageReturn];
+    return [NSString stringWithFormat:@"data:image/png;base64,%@", base64];
 }
 
 + (NSString *) toDateTime:(CMTime)cmTime {

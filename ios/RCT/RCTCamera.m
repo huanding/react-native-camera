@@ -112,7 +112,6 @@
   [self changePreviewOrientation:orientation];
 }
 
-
 - (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
     // Update the touch state.

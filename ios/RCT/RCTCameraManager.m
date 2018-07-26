@@ -343,6 +343,7 @@ RCT_CUSTOM_VIEW_PROPERTY(tensorflowEnabled, BOOL, RCTCamera)
 - (id)init {
   if ((self = [super init])) {
     self.mirrorImage = false;
+    self.itemsDetectedCount = 0;
 
     self.sessionQueue = dispatch_queue_create("cameraManagerQueue", DISPATCH_QUEUE_SERIAL);
 
@@ -496,6 +497,11 @@ RCT_EXPORT_METHOD(setZoom:(CGFloat)zoomFactor) {
       self.presetCamera = AVCaptureDevicePositionBack;
     }
 
+
+    [self.sensorOrientationChecker getDeviceOrientationWithBlock:^(UIInterfaceOrientation orientation) {
+      self.orientation = orientation;
+    }];
+
     AVCaptureStillImageOutput *stillImageOutput = [[AVCaptureStillImageOutput alloc] init];
     if ([self.session canAddOutput:stillImageOutput])
     {
@@ -518,17 +524,20 @@ RCT_EXPORT_METHOD(setZoom:(CGFloat)zoomFactor) {
       videoDataOutput.alwaysDiscardsLateVideoFrames = YES;
       AVCaptureConnection *conn = [videoDataOutput connectionWithMediaType:AVMediaTypeVideo];
       if ([conn isVideoMinFrameDurationSupported]){
-        [conn setVideoMinFrameDuration:CMTimeMake(1, 10)];
+        [conn setVideoMinFrameDuration:CMTimeMake(1, 1)];
       }
       if ([conn isVideoMaxFrameDurationSupported]) {
-        [conn setVideoMaxFrameDuration:CMTimeMake(1, 10)];
+        [conn setVideoMaxFrameDuration:CMTimeMake(1, 1)];
       }
+
       if ([self.session canAddOutput:videoDataOutput]) {
         self.sampleQueue = dispatch_queue_create("sampleQueue", NULL);
         [videoDataOutput setSampleBufferDelegate:self queue:self.sampleQueue];
         [self.session addOutput:videoDataOutput];
         self.videoDataOutput = videoDataOutput;
       }
+
+      self.imageProcessor = [[ImageProcessor alloc] initWithData:self.model labels:self.labels];
     } else {
       RCTLog(@"Enabling video capture");
       AVCaptureMovieFileOutput *movieFileOutput = [[AVCaptureMovieFileOutput alloc] init];
@@ -1065,24 +1074,29 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
           fromRect:CGRectMake(0, 0,
           CVPixelBufferGetWidth(imageBuffer),
           CVPixelBufferGetHeight(imageBuffer))];
+        CGImageRef rotatedImage = [self newCGImageRotatedByAngle:videoImage angle:270];
 
-        if (self.imageProcessor != nil) {
-          [self.imageProcessor reset];
-        } else {
-          self.imageProcessor = [[ImageProcessor alloc] initWithData:self.model labels:self.labels];
-        }
+        [self.imageProcessor reset];
         NSArray<NSDictionary *> * items =
-            [self.imageProcessor recognizeImage:videoImage orientation:[ImageHelper toOrientation:self.orientation]];
+            [self.imageProcessor recognizeImage:rotatedImage orientation:kCGImagePropertyOrientationUp];
 
         NSString* timestamp = [ImageHelper toDateTime:CMSampleBufferGetPresentationTimeStamp(sampleBuffer)];
         NSDictionary *event = @{
           @"timestamp": timestamp,
-          @"image": [ImageHelper base64Image:videoImage],
+          @"image": [ImageHelper base64Image:rotatedImage],
+          @"orientation": @"kCGImagePropertyOrientationUp",
+          @"width": rotatedImage.width,
+          @"height": rotatedImage.height,
           @"items": items,
         };
 
-        [self.bridge.eventDispatcher sendAppEventWithName:@"itemsDetected" body:event];
-        RCTLog(@"%@ sent item detected event with %d items", timestamp, (int)[items count]);
+        if ([items count] > 0 || _itemsDetectedCount != [items count]) {
+          [self.bridge.eventDispatcher sendAppEventWithName:@"itemsDetected" body:event];
+
+          _itemsDetectedCount = [items count];
+          RCTLog(@"%@ sent item detected event with %d items", timestamp, _itemsDetectedCount);
+        }
+        CGImageRelease(rotatedImage);
         CGImageRelease(videoImage);
         CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
         self.isProcessingFrame = NO;

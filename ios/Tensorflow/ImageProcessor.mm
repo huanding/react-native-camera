@@ -1,6 +1,7 @@
 #import "ImageProcessor.h"
 #import "URLHelper.h"
 #import "TensorFlowInference.h"
+#import "ImageHelper.h"
 
 #import <ImageIO/ImageIO.h>
 #import <React/RCTLog.h>
@@ -39,7 +40,7 @@
 
 - (NSArray<NSDictionary *> *) recognizeImage:(CGImageRef)imageRef orientation:(CGImagePropertyOrientation)orientation
 {
-    RCTLog(@"Process image with orientation %d", orientation);
+    RCTLog(@"Process image with orientation %@", [ImageHelper toOrientationString:orientation]);
     tensorflow::Tensor tensor = createImageTensor(imageRef, orientation);
     [inference feed:@"image_tensor" tensor:tensor];
 
