@@ -1085,8 +1085,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
           @"timestamp": timestamp,
           @"image": [ImageHelper base64Image:rotatedImage],
           @"orientation": @"kCGImagePropertyOrientationUp",
-          @"width": rotatedImage.width,
-          @"height": rotatedImage.height,
+          @"width": [NSNumber numberWithLong:CGImageGetWidth(rotatedImage)],
+          @"height": [NSNumber numberWithLong:CGImageGetHeight(rotatedImage)],
           @"items": items,
         };
 
