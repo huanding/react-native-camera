@@ -497,11 +497,6 @@ RCT_EXPORT_METHOD(setZoom:(CGFloat)zoomFactor) {
       self.presetCamera = AVCaptureDevicePositionBack;
     }
 
-
-    [self.sensorOrientationChecker getDeviceOrientationWithBlock:^(UIInterfaceOrientation orientation) {
-      self.orientation = orientation;
-    }];
-
     AVCaptureStillImageOutput *stillImageOutput = [[AVCaptureStillImageOutput alloc] init];
     if ([self.session canAddOutput:stillImageOutput])
     {
