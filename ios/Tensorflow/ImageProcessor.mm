@@ -13,6 +13,7 @@
     NSDictionary * labels;
     int maxResults;
     float threshold;
+    float maxSize;
 }
 
 - (id) initWithData:(NSString *)modelUri labels:(NSString *)labelUri
@@ -24,6 +25,7 @@
         labels = loadLabels(labelUri);
         maxResults = 3;
         threshold = 0.5;
+        maxSize = 0.8;
     }
     return self;
 }
@@ -77,7 +79,14 @@
             entry[@"name"] = labels[item_id][@"name"];
             entry[@"display_name"] = labels[item_id][@"display_name"];
             entry[@"box"] = [boxes_output subarrayWithRange: NSMakeRange(i * 4, 4)];
-            [results addObject:entry];
+
+            float entry_size = ([entry[@"box"][2] floatValue] - [entry[@"box"][0] floatValue]) *
+                ([entry[@"box"][3] floatValue] - [entry[@"box"][1] floatValue]);
+            if (entry_size < maxSize) {
+                [results addObject:entry];
+            } else {
+                RCTLog(@"Dropping large entry(%f) %@", entry_size, entry);
+            }
         }
     }
 
